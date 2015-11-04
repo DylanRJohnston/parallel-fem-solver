@@ -8,7 +8,7 @@ CC_FLAGS=-std=c99 -g -Wall -Werror -Wextra -pedantic -fopenmp
 all: main
 
 obj/%.o: %.c
-	$(CC) $(CC_FLAGS) $(OPT_FLAGS) $^ -c -o $@ #-qopt-report-file=$@.optrpt
+	$(CC) $(CC_FLAGS) $(OPT_FLAGS) $^ -c -o $@
 
 main: obj/main.o
 	$(CC) $(CC_FLAGS) $(OPT_FLAGS) $^ -o $@
