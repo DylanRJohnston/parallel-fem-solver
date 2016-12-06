@@ -37,6 +37,29 @@ double* tridiagonal_solve(const double* const a, const double* const b, const do
     return sol;
 }
 
+void old_solve(double* adiag, double* aleft, double* aright, double* f, int nu) {
+
+    aright[0] = aright[0] / adiag[0];
+
+    for (int i = 1; i < nu - 1; ++i) {
+        adiag[i] = adiag[i] - aleft[i] * aright[i - 1];
+        aright[i] = aright[i] / adiag[i];
+    }
+
+    adiag[nu - 1] = adiag[nu - 1] - aleft[nu - 1] * aright[nu - 2];
+
+    f[0] = f[0] / adiag[0];
+    for (int i = 1; i < nu; ++i) {
+        f[i] = (f[i] - aleft[i] * f[i - 1]) / adiag[i];
+    }
+
+    for (int i = nu - 2; i >= 0; --i) {
+        f[i] = f[i] - aright[i] * f[i + 1];
+    }
+
+    return;
+}
+
 void solve(
     const double* const a,
     const double* const b,
@@ -103,10 +126,10 @@ void solve(
 }
 
 int main(void) {
-    const double a[] = {0.0,9.56926,9.96821,9.22169,2.86898,6.25015,1.40662,4.10846,8.39917,5.04963};
-    const double b[] = {9.91092,8.11347,1.99982,9.07977,3.11674,5.30049,2.55666,3.01966,5.73383,2.05164};
-    const double c[] = {4.17284,5.81033,5.52629,6.55847,2.22006,6.39581,1.12284,4.85695,3.41811,0.0};
-    const double r[] = {8.43678, 4.59904, 7.20084, 1.53088, 7.56609, 2.8395, 5.57885, 4.17973, 7.71119, 7.35723};
+    double a[] = {0.0,9.56926,9.96821,9.22169,2.86898,6.25015,1.40662,4.10846,8.39917,5.04963};
+    double b[] = {9.91092,8.11347,1.99982,9.07977,3.11674,5.30049,2.55666,3.01966,5.73383,2.05164};
+    double c[] = {4.17284,5.81033,5.52629,6.55847,2.22006,6.39581,1.12284,4.85695,3.41811,0.0};
+    double r[] = {8.43678, 4.59904, 7.20084, 1.53088, 7.56609, 2.8395, 5.57885, 4.17973, 7.71119, 7.35723};
     // double* a = calloc(MAT_SIZE, sizeof(double));
     // double* b = calloc(MAT_SIZE, sizeof(double));
     // double* c = calloc(MAT_SIZE, sizeof(double));
@@ -157,8 +180,13 @@ int main(void) {
     gettimeofday(&diff, NULL);
     printf("Linear   takes %f\n", ((diff.tv_sec - start.tv_sec) * 1e6 + (diff.tv_usec - start.tv_usec))/1e6);
 
+    gettimeofday(&start, NULL);
+    old_solve(b, a, c, r, MAT_SIZE);
+    gettimeofday(&diff, NULL);
+    printf("Linear   takes %f\n", ((diff.tv_sec - start.tv_sec) * 1e6 + (diff.tv_usec - start.tv_usec))/1e6);
+
     printf("Solution is \n");
     for (int i = 0; i < MAT_SIZE; ++i) {
-        printf("%d: %f %f\n", i, s[i], other_solution[i]);
+        printf("%d: %f %f %f\n", i, s[i], other_solution[i], r[i]);
     }
 }
